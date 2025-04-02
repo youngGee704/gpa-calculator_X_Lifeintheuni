@@ -200,24 +200,6 @@ const About = () => {
           </Card>
         </div>
       </section>
-
-      {/* Etari Digital Prints */}
-      <section className="space-y-4">
-        <div className="flex items-center gap-2">
-          <GraduationCap className="h-6 w-6 text-app-green" />
-          <h2 className="text-2xl font-bold">Partner Organizations</h2>
-        </div>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-xl font-bold mb-3">Etari Digital Prints</h3>
-            <p>
-              Etari Digital Prints is one of the leading printing press in Keffi, Nasarawa State. With specialties in 
-              digital printing, writings and designs for brands, organizations and individuals.
-            </p>
-          </CardContent>
-        </Card>
-      </section>
     </div>
   );
 };
