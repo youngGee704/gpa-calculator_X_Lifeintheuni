@@ -120,12 +120,12 @@ const Contact = () => {
 
               <div className="flex space-x-2 mt-4">
                 <Button variant="outline" size="icon" asChild>
-                  <a href="https://github.com/" target="_blank" rel="noopener noreferrer">
+                  <a href="https://github.com/youngGee704" target="_blank" rel="noopener noreferrer">
                     <Github className="h-4 w-4" />
                   </a>
                 </Button>
                 <Button variant="outline" size="icon" asChild>
-                  <a href="https://linkedin.com/" target="_blank" rel="noopener noreferrer">
+                  <a href="https://www.linkedin.com/in/innocent-goodness-3257b824b/" target="_blank" rel="noopener noreferrer">
                     <Linkedin className="h-4 w-4" />
                   </a>
                 </Button>

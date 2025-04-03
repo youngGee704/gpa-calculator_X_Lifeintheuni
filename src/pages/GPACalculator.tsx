@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { PlusCircle, Trash2, Info, X } from 'lucide-react';
+import { PlusCircle, Trash2, Info, X, Printer } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,10 +11,22 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Course, GRADES, GRADE_POINTS, formatGPA } from '@/types';
 import GradePointTable from '@/components/GradePointTable';
 import { toast } from '@/components/ui/use-toast';
+import { useReactToPrint } from 'react-to-print';
+import PrintableResult from '@/components/PrintableResult';
 
 const GPACalculator = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [showInfo, setShowInfo] = useState(false);
+  const [calculatedGPA, setCalculatedGPA] = useState<number | null>(null);
+  const [totalCreditUnits, setTotalCreditUnits] = useState<number>(0);
+  const [totalQualityPoints, setTotalQualityPoints] = useState<number>(0);
+  const [studentName, setStudentName] = useState<string>('');
+  
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+  });
   
   // Initialize with one empty course
   useEffect(() => {
@@ -77,29 +89,43 @@ const GPACalculator = () => {
     });
 
     // Calculate GPA
-    const totalQualityPoints = coursesWithPoints.reduce(
+    const tce = coursesWithPoints.reduce(
       (sum, course) => sum + (course.qualityPoints || 0), 0
     );
     
-    const totalCreditUnits = coursesWithPoints.reduce(
+    const tcr = coursesWithPoints.reduce(
       (sum, course) => sum + course.creditUnits, 0
     );
 
-    const gpa = totalCreditUnits > 0 ? totalQualityPoints / totalCreditUnits : 0;
+    const gpa = tcr > 0 ? tce / tcr : 0;
 
     // Update courses with calculated points
     setCourses(coursesWithPoints);
+    setCalculatedGPA(gpa);
+    setTotalCreditUnits(tcr);
+    setTotalQualityPoints(tce);
     
     // Show result toast
     toast({
       title: "GPA Calculated",
-      description: `Your GPA is ${formatGPA(gpa)} from ${totalCreditUnits} Credit Units`,
+      description: `Your GPA is ${formatGPA(gpa)} from ${tcr} Credit Units`,
     });
   };
 
   const resetForm = () => {
     setCourses([{ id: uuidv4(), code: '', creditUnits: 0, grade: '' }]);
+    setCalculatedGPA(null);
+    setTotalCreditUnits(0);
+    setTotalQualityPoints(0);
+    setStudentName('');
   };
+
+  const printData = calculatedGPA !== null ? [
+    { label: "Total Courses", value: courses.length },
+    { label: "Total Credit Units (TCR)", value: totalCreditUnits },
+    { label: "Total Quality Points (TCE)", value: totalQualityPoints },
+    { label: "Grade Point Average (GPA)", value: formatGPA(calculatedGPA) },
+  ] : [];
 
   return (
     <div className="space-y-8">
@@ -109,6 +135,29 @@ const GPACalculator = () => {
           Enter your courses, credit units, and grades to calculate your semester GPA based on the Nigerian university grading system.
         </p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Student Information</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="studentName" className="block text-sm font-medium text-gray-700 mb-1">
+                Student Name (Optional)
+              </label>
+              <Input 
+                id="studentName"
+                placeholder="Enter your name"
+                value={studentName}
+                onChange={(e) => setStudentName(e.target.value)}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -128,9 +177,17 @@ const GPACalculator = () => {
               <Info className="h-4 w-4" />
               <AlertTitle>How GPA is calculated</AlertTitle>
               <AlertDescription>
-                <p className="mb-2">GPA = Total Quality Points ÷ Total Credit Units</p>
-                <p className="mb-2">Quality Points = Grade Point × Credit Units</p>
-                <GradePointTable />
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold mb-1">Grade Point Average (GPA)</h4>
+                    <p className="mb-2">The formula is simple:</p>
+                    <div className="bg-gray-100 p-2 rounded text-center my-2">
+                      GPA = Total Credit Earned (TCE) ÷ Total Credit Registered (TCR)
+                    </div>
+                    <p className="mb-2">Quality Points = Grade Point × Credit Units</p>
+                  </div>
+                  <GradePointTable />
+                </div>
               </AlertDescription>
             </Alert>
           )}
@@ -218,8 +275,65 @@ const GPACalculator = () => {
           </div>
         </CardContent>
       </Card>
+
+      {calculatedGPA !== null && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>GPA Result</CardTitle>
+              <Button 
+                onClick={handlePrint} 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-2"
+              >
+                <Printer className="h-4 w-4" /> Print Result
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <p className="text-sm text-gray-500">Total Credit Units (TCR)</p>
+                  <p className="text-2xl font-bold">{totalCreditUnits}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <p className="text-sm text-gray-500">Total Quality Points (TCE)</p>
+                  <p className="text-2xl font-bold">{totalQualityPoints}</p>
+                </div>
+              </div>
+              <div className="bg-blue-50 p-6 rounded-md text-center">
+                <p className="text-sm text-blue-600 mb-2">Your Grade Point Average (GPA)</p>
+                <p className="text-4xl font-bold text-blue-700">{formatGPA(calculatedGPA)}</p>
+                <p className="mt-2 text-blue-600">{calculateGradeClass(calculatedGPA)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Hidden printable component */}
+      <div className="hidden">
+        <PrintableResult
+          ref={printRef}
+          title="GPA Calculation Result"
+          data={printData}
+          studentName={studentName}
+        />
+      </div>
     </div>
   );
+};
+
+// Helper function to match the existing function in types
+const calculateGradeClass = (gpa: number): string => {
+  if (gpa >= 4.5) return 'First Class Honours';
+  if (gpa >= 3.5) return 'Second Class Honours (Upper Division)';
+  if (gpa >= 2.4) return 'Second Class Honours (Lower Division)';
+  if (gpa >= 1.5) return 'Third Class Honours';
+  if (gpa >= 1.0) return 'Pass';
+  return 'Fail';
 };
 
 export default GPACalculator;

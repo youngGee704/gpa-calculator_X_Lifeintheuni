@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { PlusCircle, Trash2, Info, X, AlertCircle } from 'lucide-react';
+import { PlusCircle, Trash2, Info, X, AlertCircle, Printer } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Semester, formatGPA, calculateGradeClass } from '@/types';
 import GradePointTable from '@/components/GradePointTable';
 import { toast } from '@/components/ui/use-toast';
+import { useReactToPrint } from 'react-to-print';
+import PrintableResult from '@/components/PrintableResult';
 
 const CGPACalculator = () => {
   const [semesters, setSemesters] = useState<Semester[]>([
@@ -32,6 +34,16 @@ const CGPACalculator = () => {
   ]);
   
   const [showInfo, setShowInfo] = useState(false);
+  const [studentName, setStudentName] = useState<string>('');
+  const [calculatedCGPA, setCalculatedCGPA] = useState<number | null>(null);
+  const [totalCreditUnitsAll, setTotalCreditUnitsAll] = useState<number>(0);
+  const [totalQualityPointsAll, setTotalQualityPointsAll] = useState<number>(0);
+  
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+  });
 
   const addSemester = () => {
     setSemesters([
@@ -98,6 +110,10 @@ const CGPACalculator = () => {
     const cgpa = totalCreditUnits > 0 ? totalQualityPoints / totalCreditUnits : 0;
     const gradeClass = calculateGradeClass(cgpa);
 
+    setCalculatedCGPA(cgpa);
+    setTotalCreditUnitsAll(totalCreditUnits);
+    setTotalQualityPointsAll(totalQualityPoints);
+
     // Show result toast
     toast({
       title: "CGPA Calculated",
@@ -116,6 +132,10 @@ const CGPACalculator = () => {
         gpa: 0 
       }
     ]);
+    setStudentName('');
+    setCalculatedCGPA(null);
+    setTotalCreditUnitsAll(0);
+    setTotalQualityPointsAll(0);
   };
 
   const handleGPAChange = (id: string, gpa: string) => {
@@ -138,6 +158,27 @@ const CGPACalculator = () => {
     updateSemester(id, 'totalQualityPoints', totalQualityPoints);
   };
 
+  const handleCreditUnitsChange = (id: string, creditUnits: string) => {
+    const value = parseInt(creditUnits);
+    if (isNaN(value) || value < 0) return;
+    
+    const semester = semesters.find(s => s.id === id);
+    if (!semester) return;
+    
+    updateSemester(id, 'totalCreditUnits', value);
+    // Update quality points when credit units change
+    const totalQualityPoints = semester.gpa * value;
+    updateSemester(id, 'totalQualityPoints', totalQualityPoints);
+  };
+
+  const printData = calculatedCGPA !== null ? [
+    { label: "Total Semesters", value: semesters.length },
+    { label: "Total Credit Units (TCR)", value: totalCreditUnitsAll },
+    { label: "Total Quality Points (TCE)", value: totalQualityPointsAll },
+    { label: "Cumulative Grade Point Average (CGPA)", value: formatGPA(calculatedCGPA) },
+    { label: "Degree Classification", value: calculateGradeClass(calculatedCGPA) }
+  ] : [];
+
   return (
     <div className="space-y-8">
       <div className="text-center">
@@ -146,6 +187,29 @@ const CGPACalculator = () => {
           Enter your semester GPAs and credit units to calculate your cumulative GPA based on the Nigerian university grading system.
         </p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Student Information</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="studentName" className="block text-sm font-medium text-gray-700 mb-1">
+                Student Name (Optional)
+              </label>
+              <Input 
+                id="studentName"
+                placeholder="Enter your name"
+                value={studentName}
+                onChange={(e) => setStudentName(e.target.value)}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -226,21 +290,12 @@ const CGPACalculator = () => {
                       min="1"
                       placeholder="e.g. 18" 
                       value={semester.totalCreditUnits || ''}
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value);
-                        updateSemester(semester.id, 'totalCreditUnits', value || 0);
-                        // Update quality points when credit units change
-                        updateSemester(
-                          semester.id, 
-                          'totalQualityPoints', 
-                          semester.gpa * (value || 0)
-                        );
-                      }}
+                      onChange={(e) => handleCreditUnitsChange(semester.id, e.target.value)}
                     />
                   </TableCell>
                   <TableCell>
                     <Input 
-                      type="text"
+                      type="number"
                       inputMode="decimal"
                       min="0"
                       max="5"
@@ -284,6 +339,43 @@ const CGPACalculator = () => {
         </CardContent>
       </Card>
 
+      {calculatedCGPA !== null && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>CGPA Result</CardTitle>
+              <Button 
+                onClick={handlePrint} 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-2"
+              >
+                <Printer className="h-4 w-4" /> Print Result
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <p className="text-sm text-gray-500">Total Credit Units (TCR)</p>
+                  <p className="text-2xl font-bold">{totalCreditUnitsAll}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <p className="text-sm text-gray-500">Total Quality Points (TCE)</p>
+                  <p className="text-2xl font-bold">{totalQualityPointsAll}</p>
+                </div>
+              </div>
+              <div className="bg-blue-50 p-6 rounded-md text-center">
+                <p className="text-sm text-blue-600 mb-2">Your Cumulative Grade Point Average (CGPA)</p>
+                <p className="text-4xl font-bold text-blue-700">{formatGPA(calculatedCGPA)}</p>
+                <p className="mt-2 text-blue-600">{calculateGradeClass(calculatedCGPA)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Alert variant="default" className="bg-gray-50 border border-gray-200">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Quick Tip</AlertTitle>
@@ -291,6 +383,16 @@ const CGPACalculator = () => {
           To calculate your CGPA accurately, you need to know the total credit units and GPA for each semester. If you don't know your semester GPAs, use the GPA Calculator first.
         </AlertDescription>
       </Alert>
+
+      {/* Hidden printable component */}
+      <div className="hidden">
+        <PrintableResult
+          ref={printRef}
+          title="CGPA Calculation Result"
+          data={printData}
+          studentName={studentName}
+        />
+      </div>
     </div>
   );
 };
