@@ -41,7 +41,14 @@ const CGPACalculator = () => {
   
   const printRef = useRef<HTMLDivElement>(null);
 
+  // Fix: Use correct syntax for useReactToPrint
   const handlePrint = useReactToPrint({
+    documentTitle: "CGPA Result",
+    onPrintError: () => toast({
+      title: "Print Error",
+      description: "An error occurred while printing",
+      variant: "destructive",
+    }),
     content: () => printRef.current,
   });
 
@@ -96,7 +103,7 @@ const CGPACalculator = () => {
       return;
     }
 
-    // Calculate CGPA - Total Credit Earned divided by Total Credit Registered
+    // Calculate CGPA - Total Quality Points divided by Total Credit Units
     const totalQualityPoints = semesters.reduce(
       (sum, semester) => sum + semester.totalQualityPoints, 
       0
@@ -344,8 +351,9 @@ const CGPACalculator = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>CGPA Result</CardTitle>
+              {/* Fix: Pass a function to onClick that calls handlePrint */}
               <Button 
-                onClick={handlePrint} 
+                onClick={() => handlePrint()} 
                 variant="outline" 
                 size="sm" 
                 className="flex items-center gap-2"

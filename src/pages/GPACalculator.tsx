@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { PlusCircle, Trash2, Info, X, Printer } from 'lucide-react';
@@ -25,10 +24,15 @@ const GPACalculator = () => {
   const printRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = useReactToPrint({
+    documentTitle: "GPA Result",
+    onPrintError: () => toast({
+      title: "Print Error",
+      description: "An error occurred while printing",
+      variant: "destructive",
+    }),
     content: () => printRef.current,
   });
   
-  // Initialize with one empty course
   useEffect(() => {
     if (courses.length === 0) {
       addCourse();
@@ -65,7 +69,6 @@ const GPACalculator = () => {
   };
 
   const calculateGPA = () => {
-    // Validate inputs
     const invalidCourses = courses.filter(course => 
       !course.code || 
       !course.grade || 
@@ -81,14 +84,12 @@ const GPACalculator = () => {
       return;
     }
 
-    // Calculate quality points for each course
     const coursesWithPoints = courses.map(course => {
       const gradePoint = GRADE_POINTS[course.grade] || 0;
       const qualityPoints = gradePoint * course.creditUnits;
       return { ...course, gradePoint, qualityPoints };
     });
 
-    // Calculate GPA
     const tce = coursesWithPoints.reduce(
       (sum, course) => sum + (course.qualityPoints || 0), 0
     );
@@ -99,13 +100,11 @@ const GPACalculator = () => {
 
     const gpa = tcr > 0 ? tce / tcr : 0;
 
-    // Update courses with calculated points
     setCourses(coursesWithPoints);
     setCalculatedGPA(gpa);
     setTotalCreditUnits(tcr);
     setTotalQualityPoints(tce);
     
-    // Show result toast
     toast({
       title: "GPA Calculated",
       description: `Your GPA is ${formatGPA(gpa)} from ${tcr} Credit Units`,
@@ -282,7 +281,7 @@ const GPACalculator = () => {
             <div className="flex items-center justify-between">
               <CardTitle>GPA Result</CardTitle>
               <Button 
-                onClick={handlePrint} 
+                onClick={() => handlePrint()} 
                 variant="outline" 
                 size="sm" 
                 className="flex items-center gap-2"
@@ -313,7 +312,6 @@ const GPACalculator = () => {
         </Card>
       )}
 
-      {/* Hidden printable component */}
       <div className="hidden">
         <PrintableResult
           ref={printRef}
@@ -326,7 +324,6 @@ const GPACalculator = () => {
   );
 };
 
-// Helper function to match the existing function in types
 const calculateGradeClass = (gpa: number): string => {
   if (gpa >= 4.5) return 'First Class Honours';
   if (gpa >= 3.5) return 'Second Class Honours (Upper Division)';
