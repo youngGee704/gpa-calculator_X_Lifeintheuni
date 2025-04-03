@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { PlusCircle, Trash2, Info, X, AlertCircle, Printer } from 'lucide-react';
@@ -47,7 +48,8 @@ const CGPACalculator = () => {
       description: "An error occurred while printing",
       variant: "destructive",
     }),
-    contentRef: () => printRef.current,
+    // Fix: Use contentRef instead of content
+    contentRef: printRef,
   });
 
   const addSemester = () => {
@@ -160,6 +162,12 @@ const CGPACalculator = () => {
   };
 
   const handleCreditUnitsChange = (id: string, creditUnits: string) => {
+    if (creditUnits === '') {
+      updateSemester(id, 'totalCreditUnits', 0);
+      updateSemester(id, 'totalQualityPoints', 0);
+      return;
+    }
+    
     const value = parseInt(creditUnits);
     if (isNaN(value) || value < 0) return;
     
@@ -287,21 +295,20 @@ const CGPACalculator = () => {
                   <TableCell>
                     <Input 
                       type="number"
-                      min="1"
+                      min="0"
                       placeholder="e.g. 18" 
-                      value={semester.totalCreditUnits || ''}
+                      value={semester.totalCreditUnits === 0 ? '' : semester.totalCreditUnits}
                       onChange={(e) => handleCreditUnitsChange(semester.id, e.target.value)}
                     />
                   </TableCell>
                   <TableCell>
                     <Input 
                       type="number"
-                      inputMode="decimal"
+                      step="0.01"
                       min="0"
                       max="5"
-                      step="0.01"
                       placeholder="e.g. 4.50" 
-                      value={semester.gpa || ''}
+                      value={semester.gpa === 0 ? '' : semester.gpa}
                       onChange={(e) => handleGPAChange(semester.id, e.target.value)}
                     />
                   </TableCell>
@@ -345,7 +352,7 @@ const CGPACalculator = () => {
             <div className="flex items-center justify-between">
               <CardTitle>CGPA Result</CardTitle>
               <Button 
-                onClick={() => handlePrint()} 
+                onClick={handlePrint} 
                 variant="outline" 
                 size="sm" 
                 className="flex items-center gap-2"
