@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { PlusCircle, Trash2, Info, X, AlertCircle, Printer } from 'lucide-react';
@@ -41,7 +40,6 @@ const CGPACalculator = () => {
   
   const printRef = useRef<HTMLDivElement>(null);
 
-  // Fix: Use correct syntax for useReactToPrint
   const handlePrint = useReactToPrint({
     documentTitle: "CGPA Result",
     onPrintError: () => toast({
@@ -49,7 +47,7 @@ const CGPACalculator = () => {
       description: "An error occurred while printing",
       variant: "destructive",
     }),
-    content: () => printRef.current,
+    contentRef: () => printRef.current,
   });
 
   const addSemester = () => {
@@ -89,7 +87,6 @@ const CGPACalculator = () => {
   };
 
   const calculateCGPA = () => {
-    // Validate inputs
     const invalidSemesters = semesters.filter(
       semester => !semester.name || semester.totalCreditUnits <= 0 || isNaN(semester.gpa) || semester.gpa > 5
     );
@@ -103,7 +100,6 @@ const CGPACalculator = () => {
       return;
     }
 
-    // Calculate CGPA - Total Quality Points divided by Total Credit Units
     const totalQualityPoints = semesters.reduce(
       (sum, semester) => sum + semester.totalQualityPoints, 
       0
@@ -121,7 +117,6 @@ const CGPACalculator = () => {
     setTotalCreditUnitsAll(totalCreditUnits);
     setTotalQualityPointsAll(totalQualityPoints);
 
-    // Show result toast
     toast({
       title: "CGPA Calculated",
       description: `Your CGPA is ${formatGPA(cgpa)} (${gradeClass})`,
@@ -146,7 +141,6 @@ const CGPACalculator = () => {
   };
 
   const handleGPAChange = (id: string, gpa: string) => {
-    // Fix: Allow empty string for clearing the field
     if (gpa === '') {
       updateSemester(id, 'gpa', 0);
       updateSemester(id, 'totalQualityPoints', 0);
@@ -173,7 +167,6 @@ const CGPACalculator = () => {
     if (!semester) return;
     
     updateSemester(id, 'totalCreditUnits', value);
-    // Update quality points when credit units change
     const totalQualityPoints = semester.gpa * value;
     updateSemester(id, 'totalQualityPoints', totalQualityPoints);
   };
@@ -351,7 +344,6 @@ const CGPACalculator = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>CGPA Result</CardTitle>
-              {/* Fix: Pass a function to onClick that calls handlePrint */}
               <Button 
                 onClick={() => handlePrint()} 
                 variant="outline" 
@@ -392,7 +384,6 @@ const CGPACalculator = () => {
         </AlertDescription>
       </Alert>
 
-      {/* Hidden printable component */}
       <div className="hidden">
         <PrintableResult
           ref={printRef}

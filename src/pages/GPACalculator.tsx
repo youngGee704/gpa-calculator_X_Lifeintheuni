@@ -30,7 +30,7 @@ const GPACalculator = () => {
       description: "An error occurred while printing",
       variant: "destructive",
     }),
-    content: () => printRef.current,
+    contentRef: () => printRef.current,
   });
   
   useEffect(() => {
