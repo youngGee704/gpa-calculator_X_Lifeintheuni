@@ -72,7 +72,7 @@ const CGPACalculator = () => {
   const calculateCGPA = () => {
     // Validate inputs
     const invalidSemesters = semesters.filter(
-      semester => !semester.name || semester.totalCreditUnits <= 0 || semester.gpa <= 0 || semester.gpa > 5
+      semester => !semester.name || semester.totalCreditUnits <= 0 || isNaN(semester.gpa) || semester.gpa > 5
     );
 
     if (invalidSemesters.length > 0) {
@@ -84,7 +84,7 @@ const CGPACalculator = () => {
       return;
     }
 
-    // Calculate CGPA
+    // Calculate CGPA - Total Credit Earned divided by Total Credit Registered
     const totalQualityPoints = semesters.reduce(
       (sum, semester) => sum + semester.totalQualityPoints, 
       0
@@ -119,6 +119,13 @@ const CGPACalculator = () => {
   };
 
   const handleGPAChange = (id: string, gpa: string) => {
+    // Fix: Allow empty string for clearing the field
+    if (gpa === '') {
+      updateSemester(id, 'gpa', 0);
+      updateSemester(id, 'totalQualityPoints', 0);
+      return;
+    }
+    
     const numGpa = parseFloat(gpa);
     if (isNaN(numGpa) || numGpa < 0 || numGpa > 5) return;
 
@@ -156,20 +163,38 @@ const CGPACalculator = () => {
           {showInfo && (
             <Alert className="mb-6">
               <Info className="h-4 w-4" />
-              <AlertTitle>How CGPA is calculated</AlertTitle>
+              <AlertTitle>How to Calculate Your GPA and CGPA in 60 Seconds!</AlertTitle>
               <AlertDescription>
-                <p className="mb-2">CGPA = Sum of (GPA × Total Credit Units for each semester) ÷ Sum of all Credit Units</p>
-                <GradePointTable />
-                <div className="mt-4">
-                  <h4 className="font-semibold mb-2">Degree Classification</h4>
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li>4.50 - 5.00: First Class Honours</li>
-                    <li>3.50 - 4.49: Second Class Honours (Upper Division)</li>
-                    <li>2.40 - 3.49: Second Class Honours (Lower Division)</li>
-                    <li>1.50 - 2.39: Third Class Honours</li>
-                    <li>1.00 - 1.49: Pass</li>
-                    <li>0.00 - 0.99: Fail</li>
-                  </ul>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold mb-1">Grade Point Average (GPA)</h4>
+                    <p className="mb-2">The formula is simple:</p>
+                    <div className="bg-gray-100 p-2 rounded text-center my-2">
+                      GPA = Total Credit Earned (TCE) ÷ Total Credit Registered (TCR)
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold mb-1">Cumulative Grade Point Average (CGPA)</h4>
+                    <p className="mb-2">Your CGPA is an academic report of your performance per session.</p>
+                    <div className="bg-gray-100 p-2 rounded text-center my-2">
+                      CGPA = (TCE of 1st Semester + TCE of 2nd Semester) ÷ (TCR of 1st Semester + TCR of 2nd Semester)
+                    </div>
+                  </div>
+                  
+                  <GradePointTable />
+                  
+                  <div>
+                    <h4 className="font-semibold mb-2">Degree Classification</h4>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>4.50 - 5.00: First Class Honours</li>
+                      <li>3.50 - 4.49: Second Class Honours (Upper Division)</li>
+                      <li>2.40 - 3.49: Second Class Honours (Lower Division)</li>
+                      <li>1.50 - 2.39: Third Class Honours</li>
+                      <li>1.00 - 1.49: Pass</li>
+                      <li>0.00 - 0.99: Fail</li>
+                    </ul>
+                  </div>
                 </div>
               </AlertDescription>
             </Alert>
@@ -179,9 +204,9 @@ const CGPACalculator = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Semester Name</TableHead>
-                <TableHead>Total Credit Units</TableHead>
+                <TableHead>Total Credit Units (TCR)</TableHead>
                 <TableHead>GPA</TableHead>
-                <TableHead>Quality Points</TableHead>
+                <TableHead>Quality Points (TCE)</TableHead>
                 <TableHead className="w-[100px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -215,7 +240,8 @@ const CGPACalculator = () => {
                   </TableCell>
                   <TableCell>
                     <Input 
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       min="0"
                       max="5"
                       step="0.01"

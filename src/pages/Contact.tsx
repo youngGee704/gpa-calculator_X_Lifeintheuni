@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Mail, Phone, MessageSquare, Send, Github, Linkedin } from 'lucide-react';
+import { Mail, Phone, Send, Github, Linkedin } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 const Contact = () => {
@@ -17,7 +18,7 @@ const Contact = () => {
     const subject = (form.elements.namedItem('subject') as HTMLInputElement).value;
     const message = (form.elements.namedItem('message') as HTMLTextAreaElement).value;
 
-    const mailtoLink = `mailto:innocentgoodness009@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
+    const mailtoLink = `mailto:gridvem704@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
       `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`
     )}`;
 
@@ -47,9 +48,19 @@ const Contact = () => {
               <div className="flex items-start space-x-4">
                 <Mail className="h-6 w-6 text-app-green" />
                 <div>
-                  <h3 className="font-semibold">Email</h3>
-                  <a href="mailto:innocentgoodness009@gmail.com" className="text-blue-600 hover:underline">
-                    innocentgoodness009@gmail.com
+                  <h3 className="font-semibold">GRIDVEM Email</h3>
+                  <a href="mailto:gridvem704@gmail.com" className="text-blue-600 hover:underline">
+                    gridvem704@gmail.com
+                  </a>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <Mail className="h-6 w-6 text-app-green" />
+                <div>
+                  <h3 className="font-semibold">Life In the University Email</h3>
+                  <a href="mailto:lifeintheuniversity.ng@gmail.com" className="text-blue-600 hover:underline">
+                    lifeintheuniversity.ng@gmail.com
                   </a>
                 </div>
               </div>
@@ -57,7 +68,7 @@ const Contact = () => {
               <div className="flex items-start space-x-4">
                 <Phone className="h-6 w-6 text-app-green" />
                 <div>
-                  <h3 className="font-semibold">WhatsApp</h3>
+                  <h3 className="font-semibold">GRIDVEM WhatsApp</h3>
                   <a 
                     href="https://api.whatsapp.com/send?phone=2347084072822&text=Hello%20,%20i%20am%20from%20Life%20in%20the%20University%20collab%20with%20your%20software%20..." 
                     className="text-blue-600 hover:underline"
@@ -65,6 +76,19 @@ const Contact = () => {
                     rel="noopener noreferrer"
                   >
                     WhatsApp Message
+                  </a>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <Phone className="h-6 w-6 text-app-green" />
+                <div>
+                  <h3 className="font-semibold">Life In the University Phone</h3>
+                  <a 
+                    href="tel:+2347032300590" 
+                    className="text-blue-600 hover:underline"
+                  >
+                    +234 703 230 0590
                   </a>
                 </div>
               </div>
