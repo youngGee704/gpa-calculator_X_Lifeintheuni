@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { PlusCircle, Trash2, Info, X, Printer } from 'lucide-react';
+import { PlusCircle, Trash2, Info, X, Printer, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,22 +13,24 @@ import { toast } from '@/components/ui/use-toast';
 import { useReactToPrint } from 'react-to-print';
 import PrintableResult from '@/components/PrintableResult';
 import PdfDownloadButton from '@/components/PdfDownloadButton';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const GPACalculator = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [showInfo, setShowInfo] = useState(false);
   const [calculatedGPA, setCalculatedGPA] = useState<number | null>(null);
   const [totalCreditRegistered, setTotalCreditRegistered] = useState<number>(0); 
-  const [totalGradePoints, setTotalGradePoints] = useState<number>(0); // Changed from totalCreditEarned
+  const [totalGradePoints, setTotalGradePoints] = useState<number>(0);
   const [studentName, setStudentName] = useState<string>('');
   
   const printRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   const handlePrint = useReactToPrint({
     documentTitle: "GPA Result",
     onPrintError: () => toast({
       title: "Print Error",
-      description: "An error occurred while printing",
+      description: "An error occurred while printing. Try using the Download PDF option instead.",
       variant: "destructive",
     }),
     contentRef: printRef,
@@ -88,12 +89,12 @@ const GPACalculator = () => {
 
     const coursesWithPoints = courses.map(course => {
       const gradePoint = GRADE_POINTS[course.grade] || 0;
-      const gradePoints = gradePoint * course.creditUnits; // Changed from creditUnitsEarned to gradePoints
-      return { ...course, gradePoint, gradePoints }; // Changed from creditUnitsEarned
+      const gradePoints = gradePoint * course.creditUnits;
+      return { ...course, gradePoint, gradePoints };
     });
 
     const tgp = coursesWithPoints.reduce(
-      (sum, course) => sum + (course.gradePoints || 0), 0 // Changed from creditUnitsEarned to gradePoints
+      (sum, course) => sum + (course.gradePoints || 0), 0
     );
     
     const tcr = coursesWithPoints.reduce(
@@ -105,7 +106,7 @@ const GPACalculator = () => {
     setCourses(coursesWithPoints);
     setCalculatedGPA(gpa);
     setTotalCreditRegistered(tcr);
-    setTotalGradePoints(tgp); // Changed from setTotalCreditEarned
+    setTotalGradePoints(tgp);
     
     toast({
       title: "GPA Calculated",
@@ -117,7 +118,7 @@ const GPACalculator = () => {
     setCourses([{ id: uuidv4(), code: '', creditUnits: 0, grade: '' }]);
     setCalculatedGPA(null);
     setTotalCreditRegistered(0);
-    setTotalGradePoints(0); // Changed from setTotalCreditEarned
+    setTotalGradePoints(0);
     setStudentName('');
   };
 
@@ -136,6 +137,25 @@ const GPACalculator = () => {
           Enter your courses, credit units, and grades to calculate your semester GPA based on the Nigerian university grading system.
         </p>
       </div>
+
+      {isMobile && (
+        <Alert variant="warning" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle className="font-sans">Mobile App User Notice</AlertTitle>
+          <AlertDescription className="font-sans">
+            For mobile app users: Use the "Download PDF" option instead of printing for better compatibility. 
+            For full features, visit the web version at{" "}
+            <a 
+              href="https://life-in-the-university-gpacalculator.netlify.app/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="underline text-blue-600"
+            >
+              life-in-the-university-gpacalculator.netlify.app
+            </a>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardHeader>
@@ -184,9 +204,9 @@ const GPACalculator = () => {
                     <h4 className="font-semibold mb-1">Grade Point Average (GPA)</h4>
                     <p className="mb-2">The formula is simple:</p>
                     <div className="bg-gray-100 p-2 rounded text-center my-2">
-                      GPA = Total Credit Earned (TCE) ÷ Total Credit Registered (TCR)
+                      GPA = Total Grade Points (TGP) ÷ Total Credit Registered (TCR)
                     </div>
-                    <p className="mb-2">Credit Units Earned (C.E.) = Grade Point × Credit Units</p>
+                    <p className="mb-2">Grade Points = Grade Point × Credit Units</p>
                   </div>
                   <GradePointTable />
                 </div>
@@ -301,6 +321,14 @@ const GPACalculator = () => {
             </div>
           </CardHeader>
           <CardContent>
+            {isMobile && (
+              <Alert variant="warning" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="font-sans">
+                  Mobile app users: Please use the "Download PDF" option instead of printing for better compatibility.
+                </AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-gray-50 p-4 rounded-md">

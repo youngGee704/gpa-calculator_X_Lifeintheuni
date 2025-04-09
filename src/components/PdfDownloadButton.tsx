@@ -31,7 +31,56 @@ const PdfDownloadButton: React.FC<PdfDownloadButtonProps> = ({
         description: "Please wait while we prepare your PDF...",
       });
 
-      const canvas = await html2canvas(contentRef.current, {
+      // Create a clone of the reference element to ensure all styles are applied
+      const element = contentRef.current;
+      let width = element.offsetWidth;
+      let height = element.offsetHeight;
+
+      // If element has no dimensions (could happen if it's hidden), use default values
+      if (width === 0 || height === 0) {
+        width = 800;  // Default width
+        height = 1200; // Default height
+        
+        // Find the closest PrintableResult component
+        const printable = document.querySelector('.hidden > [data-component="PrintableResult"]');
+        if (printable) {
+          // Temporarily make it visible for capturing
+          const originalDisplay = printable.style.display;
+          printable.style.display = 'block';
+          
+          // Capture the content
+          const canvas = await html2canvas(printable as HTMLElement, {
+            scale: 2,
+            logging: false,
+            useCORS: true,
+            allowTaint: true,
+          });
+          
+          // Restore original display
+          printable.style.display = originalDisplay;
+          
+          const imgData = canvas.toDataURL('image/png');
+          const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+          });
+          
+          // Calculate dimensions to fit the image properly
+          const imgWidth = 210; // A4 width in mm (portrait)
+          const imgHeight = canvas.height * imgWidth / canvas.width;
+          
+          pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+          pdf.save(`${fileName}.pdf`);
+          
+          toast({
+            title: "Success!",
+            description: "Your PDF has been downloaded successfully",
+          });
+          return;
+        }
+      }
+      
+      const canvas = await html2canvas(element, {
         scale: 2,
         logging: false,
         useCORS: true,

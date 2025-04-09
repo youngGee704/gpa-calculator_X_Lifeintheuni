@@ -6,6 +6,9 @@ import { toast } from '@/components/ui/use-toast';
 import PrintableResult from '@/components/PrintableResult';
 import { CGPACalculatorProvider, useCGPACalculator } from '@/context/CGPACalculatorContext';
 import { calculateGradeClass, formatGPA } from '@/types';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Import our refactored components
 import StudentInfoCard from '@/components/cgpa-calculator/StudentInfoCard';
@@ -20,17 +23,18 @@ const CGPACalculatorContent: React.FC = () => {
     semesters, 
     studentName, 
     calculatedCGPA, 
-    totalCreditRegisteredAll, // Changed from totalCreditUnitsAll
-    totalCreditEarnedAll // Changed from totalQualityPointsAll
+    totalCreditRegisteredAll,
+    totalCreditEarnedAll
   } = useCGPACalculator();
   
   const printRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   const handlePrint = useReactToPrint({
     documentTitle: "CGPA Result",
     onPrintError: () => toast({
       title: "Print Error",
-      description: "An error occurred while printing",
+      description: "An error occurred while printing. Try using the Download PDF option instead.",
       variant: "destructive",
     }),
     contentRef: printRef,
@@ -39,7 +43,7 @@ const CGPACalculatorContent: React.FC = () => {
   const printData = calculatedCGPA !== null ? [
     { label: "Total Semesters", value: semesters.length },
     { label: "Total Credit Registered (TCR)", value: totalCreditRegisteredAll },
-    { label: "Total Credit Earned (TCE)", value: totalCreditEarnedAll },
+    { label: "Total Grade Points (TGP)", value: totalCreditEarnedAll },
     { label: "Cumulative Grade Point Average (CGPA)", value: formatGPA(calculatedCGPA) },
     { label: "Degree Classification", value: calculateGradeClass(calculatedCGPA) }
   ] : [];
@@ -52,6 +56,25 @@ const CGPACalculatorContent: React.FC = () => {
           Enter your semester GPAs and credit units to calculate your cumulative GPA based on the Nigerian university grading system.
         </p>
       </div>
+
+      {isMobile && (
+        <Alert variant="warning" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle className="font-sans">Mobile App User Notice</AlertTitle>
+          <AlertDescription className="font-sans">
+            For mobile app users: Use the "Download PDF" option instead of printing for better compatibility. 
+            For full features, visit the web version at{" "}
+            <a 
+              href="https://life-in-the-university-gpacalculator.netlify.app/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="underline text-blue-600"
+            >
+              life-in-the-university-gpacalculator.netlify.app
+            </a>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <StudentInfoCard />
 
