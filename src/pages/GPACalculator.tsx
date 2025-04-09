@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { PlusCircle, Trash2, Info, X, Printer } from 'lucide-react';
@@ -7,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Course, GRADES, GRADE_POINTS, formatGPA } from '@/types';
+import { Course, GRADES, GRADE_POINTS, formatGPA, calculateGradeClass } from '@/types';
 import GradePointTable from '@/components/GradePointTable';
 import { toast } from '@/components/ui/use-toast';
 import { useReactToPrint } from 'react-to-print';
@@ -17,8 +18,8 @@ const GPACalculator = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [showInfo, setShowInfo] = useState(false);
   const [calculatedGPA, setCalculatedGPA] = useState<number | null>(null);
-  const [totalCreditUnits, setTotalCreditUnits] = useState<number>(0);
-  const [totalQualityPoints, setTotalQualityPoints] = useState<number>(0);
+  const [totalCreditRegistered, setTotalCreditRegistered] = useState<number>(0); // Changed from totalCreditUnits
+  const [totalCreditEarned, setTotalCreditEarned] = useState<number>(0); // Changed from totalQualityPoints
   const [studentName, setStudentName] = useState<string>('');
   
   const printRef = useRef<HTMLDivElement>(null);
@@ -30,7 +31,7 @@ const GPACalculator = () => {
       description: "An error occurred while printing",
       variant: "destructive",
     }),
-    contentRef: () => printRef.current,
+    contentRef: printRef,
   });
   
   useEffect(() => {
@@ -86,12 +87,12 @@ const GPACalculator = () => {
 
     const coursesWithPoints = courses.map(course => {
       const gradePoint = GRADE_POINTS[course.grade] || 0;
-      const qualityPoints = gradePoint * course.creditUnits;
-      return { ...course, gradePoint, qualityPoints };
+      const creditUnitsEarned = gradePoint * course.creditUnits; // Changed from qualityPoints to creditUnitsEarned
+      return { ...course, gradePoint, creditUnitsEarned }; // Changed from qualityPoints
     });
 
     const tce = coursesWithPoints.reduce(
-      (sum, course) => sum + (course.qualityPoints || 0), 0
+      (sum, course) => sum + (course.creditUnitsEarned || 0), 0 // Changed from qualityPoints
     );
     
     const tcr = coursesWithPoints.reduce(
@@ -102,8 +103,8 @@ const GPACalculator = () => {
 
     setCourses(coursesWithPoints);
     setCalculatedGPA(gpa);
-    setTotalCreditUnits(tcr);
-    setTotalQualityPoints(tce);
+    setTotalCreditRegistered(tcr); // Changed from totalCreditUnits
+    setTotalCreditEarned(tce); // Changed from totalQualityPoints
     
     toast({
       title: "GPA Calculated",
@@ -114,23 +115,23 @@ const GPACalculator = () => {
   const resetForm = () => {
     setCourses([{ id: uuidv4(), code: '', creditUnits: 0, grade: '' }]);
     setCalculatedGPA(null);
-    setTotalCreditUnits(0);
-    setTotalQualityPoints(0);
+    setTotalCreditRegistered(0); // Changed from totalCreditUnits
+    setTotalCreditEarned(0); // Changed from totalQualityPoints
     setStudentName('');
   };
 
   const printData = calculatedGPA !== null ? [
     { label: "Total Courses", value: courses.length },
-    { label: "Total Credit Units (TCR)", value: totalCreditUnits },
-    { label: "Total Quality Points (TCE)", value: totalQualityPoints },
+    { label: "Total Credit Registered (TCR)", value: totalCreditRegistered }, // Changed from totalCreditUnits
+    { label: "Total Credit Earned (TCE)", value: totalCreditEarned }, // Changed from totalQualityPoints
     { label: "Grade Point Average (GPA)", value: formatGPA(calculatedGPA) },
   ] : [];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 font-sans">
       <div className="text-center">
-        <h1 className="text-3xl font-bold mb-4">Semester GPA Calculator</h1>
-        <p className="text-gray-600 max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold mb-4 font-sans">Semester GPA Calculator</h1>
+        <p className="text-gray-600 max-w-2xl mx-auto font-sans">
           Enter your courses, credit units, and grades to calculate your semester GPA based on the Nigerian university grading system.
         </p>
       </div>
@@ -138,13 +139,13 @@ const GPACalculator = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Student Information</CardTitle>
+            <CardTitle className="font-sans">Student Information</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div>
-              <label htmlFor="studentName" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="studentName" className="block text-sm font-medium text-gray-700 mb-1 font-sans">
                 Student Name (Optional)
               </label>
               <Input 
@@ -152,6 +153,7 @@ const GPACalculator = () => {
                 placeholder="Enter your name"
                 value={studentName}
                 onChange={(e) => setStudentName(e.target.value)}
+                className="font-sans"
               />
             </div>
           </div>
@@ -161,12 +163,12 @@ const GPACalculator = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Course Details</CardTitle>
+            <CardTitle className="font-sans">Course Details</CardTitle>
             <Button variant="outline" size="sm" onClick={() => setShowInfo(!showInfo)}>
               {showInfo ? <X className="h-4 w-4" /> : <Info className="h-4 w-4" />}
             </Button>
           </div>
-          <CardDescription>
+          <CardDescription className="font-sans">
             Add all your courses for the semester
           </CardDescription>
         </CardHeader>
@@ -174,8 +176,8 @@ const GPACalculator = () => {
           {showInfo && (
             <Alert className="mb-6">
               <Info className="h-4 w-4" />
-              <AlertTitle>How GPA is calculated</AlertTitle>
-              <AlertDescription>
+              <AlertTitle className="font-sans">How GPA is calculated</AlertTitle>
+              <AlertDescription className="font-sans">
                 <div className="space-y-4">
                   <div>
                     <h4 className="font-semibold mb-1">Grade Point Average (GPA)</h4>
@@ -183,7 +185,7 @@ const GPACalculator = () => {
                     <div className="bg-gray-100 p-2 rounded text-center my-2">
                       GPA = Total Credit Earned (TCE) ÷ Total Credit Registered (TCR)
                     </div>
-                    <p className="mb-2">Quality Points = Grade Point × Credit Units</p>
+                    <p className="mb-2">Credit Units Earned (C.E.) = Grade Point × Credit Units</p>
                   </div>
                   <GradePointTable />
                 </div>
@@ -194,10 +196,10 @@ const GPACalculator = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Course Code</TableHead>
-                <TableHead>Credit Units</TableHead>
-                <TableHead>Grade</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
+                <TableHead className="font-sans">Course Code</TableHead>
+                <TableHead className="font-sans">Credit Units</TableHead>
+                <TableHead className="font-sans">Grade</TableHead>
+                <TableHead className="w-[100px] font-sans">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -208,6 +210,7 @@ const GPACalculator = () => {
                       placeholder="e.g. MTH101" 
                       value={course.code}
                       onChange={(e) => updateCourse(course.id, 'code', e.target.value)}
+                      className="font-sans"
                     />
                   </TableCell>
                   <TableCell>
@@ -215,12 +218,12 @@ const GPACalculator = () => {
                       value={course.creditUnits.toString()}
                       onValueChange={(value) => updateCourse(course.id, 'creditUnits', parseInt(value))}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full font-sans">
                         <SelectValue placeholder="Units" />
                       </SelectTrigger>
                       <SelectContent>
                         {[1, 2, 3, 4, 5, 6].map((unit) => (
-                          <SelectItem key={unit} value={unit.toString()}>
+                          <SelectItem key={unit} value={unit.toString()} className="font-sans">
                             {unit}
                           </SelectItem>
                         ))}
@@ -232,12 +235,12 @@ const GPACalculator = () => {
                       value={course.grade}
                       onValueChange={(value) => updateCourse(course.id, 'grade', value)}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full font-sans">
                         <SelectValue placeholder="Grade" />
                       </SelectTrigger>
                       <SelectContent>
                         {GRADES.map((grade) => (
-                          <SelectItem key={grade.value} value={grade.value}>
+                          <SelectItem key={grade.value} value={grade.value} className="font-sans">
                             {grade.name} ({grade.points})
                           </SelectItem>
                         ))}
@@ -263,13 +266,13 @@ const GPACalculator = () => {
               variant="outline" 
               size="sm" 
               onClick={addCourse} 
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 font-sans"
             >
               <PlusCircle className="h-4 w-4" /> Add Course
             </Button>
             <div className="space-x-2">
-              <Button variant="outline" onClick={resetForm}>Reset</Button>
-              <Button onClick={calculateGPA}>Calculate GPA</Button>
+              <Button variant="outline" onClick={resetForm} className="font-sans">Reset</Button>
+              <Button onClick={calculateGPA} className="font-sans">Calculate GPA</Button>
             </div>
           </div>
         </CardContent>
@@ -279,12 +282,12 @@ const GPACalculator = () => {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>GPA Result</CardTitle>
+              <CardTitle className="font-sans">GPA Result</CardTitle>
               <Button 
                 onClick={() => handlePrint()} 
                 variant="outline" 
                 size="sm" 
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 font-sans"
               >
                 <Printer className="h-4 w-4" /> Print Result
               </Button>
@@ -294,18 +297,18 @@ const GPACalculator = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-gray-50 p-4 rounded-md">
-                  <p className="text-sm text-gray-500">Total Credit Units (TCR)</p>
-                  <p className="text-2xl font-bold">{totalCreditUnits}</p>
+                  <p className="text-sm text-gray-500 font-sans">Total Credit Registered (TCR)</p>
+                  <p className="text-2xl font-bold font-sans">{totalCreditRegistered}</p>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-md">
-                  <p className="text-sm text-gray-500">Total Quality Points (TCE)</p>
-                  <p className="text-2xl font-bold">{totalQualityPoints}</p>
+                  <p className="text-sm text-gray-500 font-sans">Total Credit Earned (TCE)</p>
+                  <p className="text-2xl font-bold font-sans">{totalCreditEarned}</p>
                 </div>
               </div>
               <div className="bg-blue-50 p-6 rounded-md text-center">
-                <p className="text-sm text-blue-600 mb-2">Your Grade Point Average (GPA)</p>
-                <p className="text-4xl font-bold text-blue-700">{formatGPA(calculatedGPA)}</p>
-                <p className="mt-2 text-blue-600">{calculateGradeClass(calculatedGPA)}</p>
+                <p className="text-sm text-blue-600 mb-2 font-sans">Your Grade Point Average (GPA)</p>
+                <p className="text-4xl font-bold text-blue-700 font-sans">{formatGPA(calculatedGPA)}</p>
+                <p className="mt-2 text-blue-600 font-sans">{calculateGradeClass(calculatedGPA)}</p>
               </div>
             </div>
           </CardContent>
@@ -322,15 +325,6 @@ const GPACalculator = () => {
       </div>
     </div>
   );
-};
-
-const calculateGradeClass = (gpa: number): string => {
-  if (gpa >= 4.5) return 'First Class Honours';
-  if (gpa >= 3.5) return 'Second Class Honours (Upper Division)';
-  if (gpa >= 2.4) return 'Second Class Honours (Lower Division)';
-  if (gpa >= 1.5) return 'Third Class Honours';
-  if (gpa >= 1.0) return 'Pass';
-  return 'Fail';
 };
 
 export default GPACalculator;

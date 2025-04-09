@@ -5,15 +5,15 @@ export interface Course {
   creditUnits: number;
   grade: string;
   gradePoint?: number;
-  qualityPoints?: number;
+  creditUnitsEarned?: number; // C.E.
 }
 
 export interface Semester {
   id: string;
   name: string;
   courses: Course[];
-  totalCreditUnits: number;
-  totalQualityPoints: number;
+  totalCreditRegistered: number; // TCR
+  totalCreditEarned: number; // TCE
   gpa: number;
 }
 

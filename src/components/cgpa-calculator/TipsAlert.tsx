@@ -8,9 +8,10 @@ const TipsAlert: React.FC = () => {
     <Alert variant="default" className="bg-gray-50 border border-gray-200">
       <AlertCircle className="h-4 w-4" />
       <AlertTitle>Quick Tip</AlertTitle>
-      <AlertDescription>
-        To calculate your CGPA accurately, you need to know the total credit units and GPA for each semester. 
-        If you don't know your semester GPAs, use the GPA Calculator first.
+      <AlertDescription className="font-sans">
+        To calculate your CGPA accurately, you need to know the Total Credit Earned (TCE) and 
+        Total Credit Registered (TCR) for each semester. If you don't know your semester GPAs, 
+        use the GPA Calculator first.
       </AlertDescription>
     </Alert>
   );

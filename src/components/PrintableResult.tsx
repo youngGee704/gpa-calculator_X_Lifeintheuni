@@ -16,7 +16,7 @@ const PrintableResult = React.forwardRef<HTMLDivElement, PrintableResultProps>(
     const currentDate = new Date().toLocaleDateString();
     
     return (
-      <div ref={ref} className="p-8 bg-white relative">
+      <div ref={ref} className="p-8 bg-white relative font-sans">
         {/* Watermark */}
         <div className="absolute inset-0 flex items-center justify-center opacity-[0.07] pointer-events-none z-0">
           <div className="rotate-[-30deg] scale-150">

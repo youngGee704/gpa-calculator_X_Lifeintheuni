@@ -16,7 +16,14 @@ import CGPAResultCard from '@/components/cgpa-calculator/CGPAResultCard';
 import TipsAlert from '@/components/cgpa-calculator/TipsAlert';
 
 const CGPACalculatorContent: React.FC = () => {
-  const { semesters, studentName, calculatedCGPA, totalCreditUnitsAll, totalQualityPointsAll } = useCGPACalculator();
+  const { 
+    semesters, 
+    studentName, 
+    calculatedCGPA, 
+    totalCreditRegisteredAll, // Changed from totalCreditUnitsAll
+    totalCreditEarnedAll // Changed from totalQualityPointsAll
+  } = useCGPACalculator();
+  
   const printRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = useReactToPrint({
@@ -31,17 +38,17 @@ const CGPACalculatorContent: React.FC = () => {
 
   const printData = calculatedCGPA !== null ? [
     { label: "Total Semesters", value: semesters.length },
-    { label: "Total Credit Units (TCR)", value: totalCreditUnitsAll },
-    { label: "Total Quality Points (TCE)", value: totalQualityPointsAll },
+    { label: "Total Credit Registered (TCR)", value: totalCreditRegisteredAll },
+    { label: "Total Credit Earned (TCE)", value: totalCreditEarnedAll },
     { label: "Cumulative Grade Point Average (CGPA)", value: formatGPA(calculatedCGPA) },
     { label: "Degree Classification", value: calculateGradeClass(calculatedCGPA) }
   ] : [];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 font-sans">
       <div className="text-center">
-        <h1 className="text-3xl font-bold mb-4">Cumulative GPA (CGPA) Calculator</h1>
-        <p className="text-gray-600 max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold mb-4 font-sans">Cumulative GPA (CGPA) Calculator</h1>
+        <p className="text-gray-600 max-w-2xl mx-auto font-sans">
           Enter your semester GPAs and credit units to calculate your cumulative GPA based on the Nigerian university grading system.
         </p>
       </div>
@@ -51,7 +58,7 @@ const CGPACalculatorContent: React.FC = () => {
       <Card>
         <CardHeader>
           <InformationSection />
-          <CardDescription>
+          <CardDescription className="font-sans">
             Add all your semesters with their GPAs and total credit units
           </CardDescription>
         </CardHeader>

@@ -20,7 +20,7 @@ const SemesterTable: React.FC = () => {
     updateSemester, 
     removeSemester, 
     handleGPAChange,
-    handleCreditUnitsChange
+    handleCreditRegisteredChange
   } = useCGPACalculator();
   
   return (
@@ -28,9 +28,9 @@ const SemesterTable: React.FC = () => {
       <TableHeader>
         <TableRow>
           <TableHead>Semester Name</TableHead>
-          <TableHead>Total Credit Units (TCR)</TableHead>
+          <TableHead>Total Credit Registered (TCR)</TableHead>
           <TableHead>GPA</TableHead>
-          <TableHead>Quality Points (TCE)</TableHead>
+          <TableHead>Total Credit Earned (TCE)</TableHead>
           <TableHead className="w-[100px]">Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -42,6 +42,7 @@ const SemesterTable: React.FC = () => {
                 placeholder="e.g. Year 1, Semester 1" 
                 value={semester.name}
                 onChange={(e) => updateSemester(semester.id, 'name', e.target.value)}
+                className="font-sans"
               />
             </TableCell>
             <TableCell>
@@ -49,8 +50,9 @@ const SemesterTable: React.FC = () => {
                 type="number"
                 min="0"
                 placeholder="e.g. 18" 
-                value={semester.totalCreditUnits === 0 ? '' : semester.totalCreditUnits}
-                onChange={(e) => handleCreditUnitsChange(semester.id, e.target.value)}
+                value={semester.totalCreditRegistered === 0 ? '' : semester.totalCreditRegistered}
+                onChange={(e) => handleCreditRegisteredChange(semester.id, e.target.value)}
+                className="font-sans"
               />
             </TableCell>
             <TableCell>
@@ -62,10 +64,13 @@ const SemesterTable: React.FC = () => {
                 placeholder="e.g. 4.50" 
                 value={semester.gpa === 0 ? '' : semester.gpa}
                 onChange={(e) => handleGPAChange(semester.id, e.target.value)}
+                className="font-sans"
               />
             </TableCell>
             <TableCell>
-              {formatGPA(semester.totalQualityPoints)}
+              <div className="text-center font-sans">
+                {formatGPA(semester.totalCreditEarned)}
+              </div>
             </TableCell>
             <TableCell>
               <Button
