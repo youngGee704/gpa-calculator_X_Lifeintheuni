@@ -122,8 +122,8 @@ const GPACalculator = () => {
 
   const printData = calculatedGPA !== null ? [
     { label: "Total Courses", value: courses.length },
-    { label: "Total Credit Registered (TCR)", value: totalCreditRegistered }, // Changed from totalCreditUnits
-    { label: "Total Credit Earned (TCE)", value: totalCreditEarned }, // Changed from totalQualityPoints
+    { label: "Total Credit Registered (TCR)", value: totalCreditRegistered },
+    { label: "Total Credit Earned (TCE)", value: totalCreditEarned },
     { label: "Grade Point Average (GPA)", value: formatGPA(calculatedGPA) },
   ] : [];
 
@@ -321,6 +321,8 @@ const GPACalculator = () => {
           title="GPA Calculation Result"
           data={printData}
           studentName={studentName}
+          courses={courses}
+          isGPA={true}
         />
       </div>
     </div>

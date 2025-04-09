@@ -8,16 +8,14 @@ interface CGPACalculatorContextType {
   semesters: Semester[];
   studentName: string;
   calculatedCGPA: number | null;
-  totalCreditRegisteredAll: number; // Changed from totalCreditUnitsAll
-  totalCreditEarnedAll: number; // Changed from totalQualityPointsAll
+  totalCreditRegisteredAll: number;
+  totalCreditEarnedAll: number;
   setStudentName: (name: string) => void;
   addSemester: () => void;
   removeSemester: (id: string) => void;
   updateSemester: (id: string, field: keyof Semester, value: any) => void;
   calculateCGPA: () => void;
   resetForm: () => void;
-  handleGPAChange: (id: string, gpa: string) => void;
-  handleCreditRegisteredChange: (id: string, creditUnits: string) => void; // Changed from handleCreditUnitsChange
 }
 
 const CGPACalculatorContext = createContext<CGPACalculatorContextType | undefined>(undefined);
@@ -28,16 +26,16 @@ export const CGPACalculatorProvider: React.FC<{ children: React.ReactNode }> = (
       id: uuidv4(), 
       name: 'Semester 1', 
       courses: [], 
-      totalCreditRegistered: 0, // Changed from totalCreditUnits
-      totalCreditEarned: 0, // Changed from totalQualityPoints
+      totalCreditRegistered: 0,
+      totalCreditEarned: 0,
       gpa: 0 
     }
   ]);
   
   const [studentName, setStudentName] = useState<string>('');
   const [calculatedCGPA, setCalculatedCGPA] = useState<number | null>(null);
-  const [totalCreditRegisteredAll, setTotalCreditRegisteredAll] = useState<number>(0); // Changed from totalCreditUnitsAll
-  const [totalCreditEarnedAll, setTotalCreditEarnedAll] = useState<number>(0); // Changed from totalQualityPointsAll
+  const [totalCreditRegisteredAll, setTotalCreditRegisteredAll] = useState<number>(0);
+  const [totalCreditEarnedAll, setTotalCreditEarnedAll] = useState<number>(0);
   
   const addSemester = () => {
     setSemesters([
@@ -46,8 +44,8 @@ export const CGPACalculatorProvider: React.FC<{ children: React.ReactNode }> = (
         id: uuidv4(), 
         name: `Semester ${semesters.length + 1}`, 
         courses: [], 
-        totalCreditRegistered: 0, // Changed from totalCreditUnits
-        totalCreditEarned: 0, // Changed from totalQualityPoints
+        totalCreditRegistered: 0,
+        totalCreditEarned: 0,
         gpa: 0 
       }
     ]);
@@ -69,6 +67,15 @@ export const CGPACalculatorProvider: React.FC<{ children: React.ReactNode }> = (
   const updateSemester = (id: string, field: keyof Semester, value: any) => {
     setSemesters(semesters.map(semester => {
       if (semester.id === id) {
+        // If updating totalCreditRegistered or totalCreditEarned,
+        // also update the gpa if possible
+        if ((field === 'totalCreditRegistered' || field === 'totalCreditEarned') && semester.totalCreditRegistered > 0) {
+          const updatedSemester = { ...semester, [field]: value };
+          const gpa = updatedSemester.totalCreditRegistered > 0 
+            ? updatedSemester.totalCreditEarned / updatedSemester.totalCreditRegistered 
+            : 0;
+          return { ...updatedSemester, gpa };
+        }
         return { ...semester, [field]: value };
       }
       return semester;
@@ -77,13 +84,13 @@ export const CGPACalculatorProvider: React.FC<{ children: React.ReactNode }> = (
 
   const calculateCGPA = () => {
     const invalidSemesters = semesters.filter(
-      semester => !semester.name || semester.totalCreditRegistered <= 0 || isNaN(semester.gpa) || semester.gpa > 5
+      semester => !semester.name || semester.totalCreditRegistered <= 0 || semester.totalCreditEarned <= 0
     );
 
     if (invalidSemesters.length > 0) {
       toast({
         title: "Invalid Input",
-        description: "Please fill in all semester details with valid GPAs (0-5) and credit units",
+        description: "Please fill in all semester details with valid Total Credit Registered (TCR) and Total Credit Earned (TCE)",
         variant: "destructive",
       });
       return;
@@ -117,8 +124,8 @@ export const CGPACalculatorProvider: React.FC<{ children: React.ReactNode }> = (
         id: uuidv4(), 
         name: 'Semester 1', 
         courses: [], 
-        totalCreditRegistered: 0, // Changed from totalCreditUnits
-        totalCreditEarned: 0, // Changed from totalQualityPoints
+        totalCreditRegistered: 0,
+        totalCreditEarned: 0,
         gpa: 0 
       }
     ]);
@@ -128,58 +135,19 @@ export const CGPACalculatorProvider: React.FC<{ children: React.ReactNode }> = (
     setTotalCreditEarnedAll(0);
   };
 
-  const handleGPAChange = (id: string, gpa: string) => {
-    if (gpa === '') {
-      updateSemester(id, 'gpa', 0);
-      updateSemester(id, 'totalCreditEarned', 0); // Changed from totalQualityPoints
-      return;
-    }
-    
-    const numGpa = parseFloat(gpa);
-    if (isNaN(numGpa) || numGpa < 0 || numGpa > 5) return;
-
-    const semester = semesters.find(s => s.id === id);
-    if (!semester) return;
-
-    const totalCreditEarned = numGpa * semester.totalCreditRegistered; // Changed from totalCreditUnits
-    
-    updateSemester(id, 'gpa', numGpa);
-    updateSemester(id, 'totalCreditEarned', totalCreditEarned); // Changed from totalQualityPoints
-  };
-
-  const handleCreditRegisteredChange = (id: string, creditUnits: string) => {
-    if (creditUnits === '') {
-      updateSemester(id, 'totalCreditRegistered', 0); // Changed from totalCreditUnits
-      updateSemester(id, 'totalCreditEarned', 0); // Changed from totalQualityPoints
-      return;
-    }
-    
-    const value = parseInt(creditUnits);
-    if (isNaN(value) || value < 0) return;
-    
-    const semester = semesters.find(s => s.id === id);
-    if (!semester) return;
-    
-    updateSemester(id, 'totalCreditRegistered', value); // Changed from totalCreditUnits
-    const totalCreditEarned = semester.gpa * value; // Changed from totalQualityPoints
-    updateSemester(id, 'totalCreditEarned', totalCreditEarned); // Changed from totalQualityPoints
-  };
-
   return (
     <CGPACalculatorContext.Provider value={{
       semesters,
       studentName,
       calculatedCGPA,
-      totalCreditRegisteredAll, // Changed from totalCreditUnitsAll
-      totalCreditEarnedAll, // Changed from totalQualityPointsAll
+      totalCreditRegisteredAll,
+      totalCreditEarnedAll,
       setStudentName,
       addSemester,
       removeSemester,
       updateSemester,
       calculateCGPA,
       resetForm,
-      handleGPAChange,
-      handleCreditRegisteredChange, // Changed from handleCreditUnitsChange
     }}>
       {children}
     </CGPACalculatorContext.Provider>
