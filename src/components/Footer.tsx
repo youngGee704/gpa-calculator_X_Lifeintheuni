@@ -33,17 +33,32 @@ const Footer = () => {
             <ul className="space-y-2">
               <li className="flex items-center">
                 <Mail size={16} className="mr-2" />
-                <a href="mailto:innocentgoodness009@gmail.com" className="text-gray-400 hover:text-white transition-colors">
-                  innocentgoodness009@gmail.com
-                </a>
+                <div>
+                  <h4 className="text-white text-sm">GRIDVEM Email:</h4>
+                  <a href="mailto:gridvem704@gmail.com" className="text-gray-400 hover:text-white transition-colors">
+                    gridvem704@gmail.com
+                  </a>
+                </div>
+              </li>
+              <li className="flex items-center">
+                <Mail size={16} className="mr-2" />
+                <div>
+                  <h4 className="text-white text-sm">Life In the University Email:</h4>
+                  <a href="mailto:lifeintheuniversity.ng@gmail.com" className="text-gray-400 hover:text-white transition-colors">
+                    lifeintheuniversity.ng@gmail.com
+                  </a>
+                </div>
               </li>
               <li className="flex items-center">
                 <Phone size={16} className="mr-2" />
-                <a href="https://api.whatsapp.com/send?phone=2347084072822&text=Hello%20,%20i%20am%20from%20Life%20in%20the%20University%20collab%20with%20your%20software%20..." 
-                   className="text-gray-400 hover:text-white transition-colors"
-                   target="_blank" rel="noopener noreferrer">
-                  WhatsApp
-                </a>
+                <div>
+                  <h4 className="text-white text-sm">Developer's WhatsApp:</h4>
+                  <a href="https://api.whatsapp.com/send?phone=2347084072822&text=Hello%20,%20i%20am%20from%20Life%20in%20the%20University%20collab%20with%20your%20software%20..." 
+                     className="text-gray-400 hover:text-white transition-colors"
+                     target="_blank" rel="noopener noreferrer">
+                    WhatsApp
+                  </a>
+                </div>
               </li>
             </ul>
           </div>

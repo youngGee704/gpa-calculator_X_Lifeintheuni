@@ -14,7 +14,7 @@ interface PrintableResultProps {
     creditUnits: number;
     grade: string;
     gradePoint?: number;
-    creditUnitsEarned?: number;
+    gradePoints?: number; // Changed from creditUnitsEarned
   }[];
   isGPA?: boolean;
 }
@@ -67,7 +67,7 @@ const PrintableResult = React.forwardRef<HTMLDivElement, PrintableResultProps>(
                       <th className="border px-4 py-2 text-left">Credit Units</th>
                       <th className="border px-4 py-2 text-left">Grade</th>
                       <th className="border px-4 py-2 text-left">Grade Point</th>
-                      <th className="border px-4 py-2 text-left">Credit Earned</th>
+                      <th className="border px-4 py-2 text-left">Grade Points</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -77,7 +77,7 @@ const PrintableResult = React.forwardRef<HTMLDivElement, PrintableResultProps>(
                         <td className="border px-4 py-2">{course.creditUnits}</td>
                         <td className="border px-4 py-2">{course.grade}</td>
                         <td className="border px-4 py-2">{course.gradePoint}</td>
-                        <td className="border px-4 py-2">{course.creditUnitsEarned}</td>
+                        <td className="border px-4 py-2">{course.gradePoints}</td>
                       </tr>
                     ))}
                   </tbody>

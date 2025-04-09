@@ -5,7 +5,7 @@ export interface Course {
   creditUnits: number;
   grade: string;
   gradePoint?: number;
-  creditUnitsEarned?: number; // C.E.
+  gradePoints?: number; // Changed from creditUnitsEarned to gradePoints
 }
 
 export interface Semester {
@@ -13,7 +13,7 @@ export interface Semester {
   name: string;
   courses: Course[];
   totalCreditRegistered: number; // TCR
-  totalCreditEarned: number; // TCE
+  totalGradePoints: number; // Changed from totalCreditEarned to totalGradePoints (TGP)
   gpa: number;
 }
 
