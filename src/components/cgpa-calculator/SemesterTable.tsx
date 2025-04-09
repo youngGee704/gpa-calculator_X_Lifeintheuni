@@ -41,9 +41,9 @@ const SemesterTable: React.FC = () => {
     updateSemester(id, 'totalCreditRegistered', numValue);
   };
 
-  const handleTCEChange = (id: string, value: string) => {
+  const handleTGPChange = (id: string, value: string) => {
     if (value === '') {
-      updateSemester(id, 'totalCreditEarned', 0);
+      updateSemester(id, 'totalGradePoints', 0);
       return;
     }
     
@@ -51,13 +51,13 @@ const SemesterTable: React.FC = () => {
     if (isNaN(numValue) || numValue < 0) {
       toast({
         title: "Invalid Input",
-        description: "Credit earned must be a positive number",
+        description: "Total Grade Points must be a positive number",
         variant: "destructive",
       });
       return;
     }
     
-    updateSemester(id, 'totalCreditEarned', numValue);
+    updateSemester(id, 'totalGradePoints', numValue);
   };
   
   return (
@@ -66,7 +66,7 @@ const SemesterTable: React.FC = () => {
         <TableRow>
           <TableHead>Semester Name</TableHead>
           <TableHead>Total Credit Registered (TCR)</TableHead>
-          <TableHead>Total Credit Earned (TCE)</TableHead>
+          <TableHead>Total Grade Points (TGP)</TableHead>
           <TableHead>Semester GPA</TableHead>
           <TableHead className="w-[100px]">Actions</TableHead>
         </TableRow>
@@ -74,7 +74,7 @@ const SemesterTable: React.FC = () => {
       <TableBody>
         {semesters.map((semester) => {
           const semesterGPA = semester.totalCreditRegistered > 0 
-            ? semester.totalCreditEarned / semester.totalCreditRegistered 
+            ? semester.totalGradePoints / semester.totalCreditRegistered 
             : 0;
             
           return (
@@ -104,8 +104,8 @@ const SemesterTable: React.FC = () => {
                   min="0"
                   step="0.01"
                   placeholder="e.g. 114" 
-                  value={semester.totalCreditEarned === 0 ? '' : semester.totalCreditEarned}
-                  onChange={(e) => handleTCEChange(semester.id, e.target.value)}
+                  value={semester.totalGradePoints === 0 ? '' : semester.totalGradePoints}
+                  onChange={(e) => handleTGPChange(semester.id, e.target.value)}
                   className="font-sans"
                 />
               </TableCell>

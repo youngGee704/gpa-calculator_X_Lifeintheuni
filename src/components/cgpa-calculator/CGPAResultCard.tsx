@@ -42,7 +42,7 @@ const CGPAResultCard: React.FC<CGPAResultCardProps> = ({ onPrint }) => {
               <p className="text-2xl font-bold font-sans">{totalCreditRegisteredAll}</p>
             </div>
             <div className="bg-gray-50 p-4 rounded-md">
-              <p className="text-sm text-gray-500 font-sans">Total Credit Earned (TCE)</p>
+              <p className="text-sm text-gray-500 font-sans">Total Grade Points (TGP)</p>
               <p className="text-2xl font-bold font-sans">{totalCreditEarnedAll}</p>
             </div>
           </div>

@@ -27,7 +27,7 @@ export const CGPACalculatorProvider: React.FC<{ children: React.ReactNode }> = (
       name: 'Semester 1', 
       courses: [], 
       totalCreditRegistered: 0,
-      totalCreditEarned: 0,
+      totalGradePoints: 0,
       gpa: 0 
     }
   ]);
@@ -45,7 +45,7 @@ export const CGPACalculatorProvider: React.FC<{ children: React.ReactNode }> = (
         name: `Semester ${semesters.length + 1}`, 
         courses: [], 
         totalCreditRegistered: 0,
-        totalCreditEarned: 0,
+        totalGradePoints: 0,
         gpa: 0 
       }
     ]);
@@ -67,12 +67,12 @@ export const CGPACalculatorProvider: React.FC<{ children: React.ReactNode }> = (
   const updateSemester = (id: string, field: keyof Semester, value: any) => {
     setSemesters(semesters.map(semester => {
       if (semester.id === id) {
-        // If updating totalCreditRegistered or totalCreditEarned,
+        // If updating totalCreditRegistered or totalGradePoints,
         // also update the gpa if possible
-        if ((field === 'totalCreditRegistered' || field === 'totalCreditEarned') && semester.totalCreditRegistered > 0) {
+        if ((field === 'totalCreditRegistered' || field === 'totalGradePoints') && semester.totalCreditRegistered > 0) {
           const updatedSemester = { ...semester, [field]: value };
           const gpa = updatedSemester.totalCreditRegistered > 0 
-            ? updatedSemester.totalCreditEarned / updatedSemester.totalCreditRegistered 
+            ? updatedSemester.totalGradePoints / updatedSemester.totalCreditRegistered 
             : 0;
           return { ...updatedSemester, gpa };
         }
@@ -84,20 +84,20 @@ export const CGPACalculatorProvider: React.FC<{ children: React.ReactNode }> = (
 
   const calculateCGPA = () => {
     const invalidSemesters = semesters.filter(
-      semester => !semester.name || semester.totalCreditRegistered <= 0 || semester.totalCreditEarned <= 0
+      semester => !semester.name || semester.totalCreditRegistered <= 0 || semester.totalGradePoints <= 0
     );
 
     if (invalidSemesters.length > 0) {
       toast({
         title: "Invalid Input",
-        description: "Please fill in all semester details with valid Total Credit Registered (TCR) and Total Credit Earned (TCE)",
+        description: "Please fill in all semester details with valid Total Credit Registered (TCR) and Total Grade Points (TGP)",
         variant: "destructive",
       });
       return;
     }
 
-    const totalCreditEarned = semesters.reduce(
-      (sum, semester) => sum + semester.totalCreditEarned, 
+    const totalGradePoints = semesters.reduce(
+      (sum, semester) => sum + semester.totalGradePoints, 
       0
     );
     
@@ -106,11 +106,11 @@ export const CGPACalculatorProvider: React.FC<{ children: React.ReactNode }> = (
       0
     );
 
-    const cgpa = totalCreditRegistered > 0 ? totalCreditEarned / totalCreditRegistered : 0;
+    const cgpa = totalCreditRegistered > 0 ? totalGradePoints / totalCreditRegistered : 0;
 
     setCalculatedCGPA(cgpa);
     setTotalCreditRegisteredAll(totalCreditRegistered);
-    setTotalCreditEarnedAll(totalCreditEarned);
+    setTotalCreditEarnedAll(totalGradePoints);
 
     toast({
       title: "CGPA Calculated",
@@ -125,7 +125,7 @@ export const CGPACalculatorProvider: React.FC<{ children: React.ReactNode }> = (
         name: 'Semester 1', 
         courses: [], 
         totalCreditRegistered: 0,
-        totalCreditEarned: 0,
+        totalGradePoints: 0,
         gpa: 0 
       }
     ]);
